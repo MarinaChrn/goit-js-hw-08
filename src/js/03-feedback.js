@@ -13,9 +13,10 @@
 // lodash.throttle.
 
 // const formEl = document.querySelector('.feedback-form');
+// console.log(formEl);
 // const inputEl = formEl.querySelector('input');
 // const textAreaEl = formEl.querySelector('textarea');
-// inputEl.value = "5";
+// console.log(formEl);
 // formEl.addEventListener('input', function() {
 //     console.log(inputEl.currentTarget.value);
 //     // const inform = {
@@ -24,39 +25,36 @@
 // });
 
 const LOCAL_KEY = 'feedback-form-state';
-let formData = JSON.parse(localStorage.getItem(LOCAL_KEY)) || {};
-
-form = document.querySelector('.feedback-form');
-
-form.addEventListener('input', throttle(storageFormData, 500));
+const form = document.querySelector('.feedback-form');
+populateFeedbackForm();
 form.addEventListener('submit', onFormSubmit);
-
-reloadPage();
-
-function storageFormData(e) {
-  formData[e.target.name] = e.target.value.trim();
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(formData));
-}
+form.addEventListener('input', throttle(onInputData, 500));
 
 function onFormSubmit(e) {
   e.preventDefault();
-  //      if (refs.input.value === "" || refs.textarea.value === "") {
-  //          return alert(`Please fill in all the fields!`);
-  //      }
-  // or
-  // const { email, message } = e.currentTarget.elements;
-  // console.log({ email: email.value, message: message.value });
-  // or
-  console.log(formData);
+  const { email, message } = e.currentTarget.elements;
+  console.log({ email: email.value, message: message.value });
+  if (localStorage.getItem(LOCAL_KEY)) {
+    localStorage.removeItem(LOCAL_KEY);
+  }
   e.currentTarget.reset();
-  localStorage.removeItem(LOCAL_KEY);
-  formData = {};
 }
 
-function reloadPage() {
-  if (formData) {
-    let { email, message } = form.elements;
-    email.value = formData.email || '';
-    message.value = formData.message || '';
+function onInputData(e) {
+  let data = localStorage.getItem(LOCAL_KEY);
+  data = data ? JSON.parse(data) : {};
+  data[e.target.name] = e.target.value.trim();
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+}
+
+function populateFeedbackForm() {
+  let data = localStorage.getItem(LOCAL_KEY);
+  if (!data) return;
+  data = JSON.parse(data);
+  // Object.entries(data).forEach(([name, value]) => {
+  //   form.elements[name].value = value || '';
+  // });
+  for (const key in data) {
+    form.elements[key].value = data[key] || '';
   }
 }
